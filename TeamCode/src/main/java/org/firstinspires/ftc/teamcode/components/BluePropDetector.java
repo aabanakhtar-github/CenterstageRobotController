@@ -28,7 +28,7 @@ public class BluePropDetector {
     VisionPortal m_VisionPortal;
 
     public BluePropDetector(HardwareMap hwmap) {
-        m_Pipeline = new Pipeline(hwmap);
+        m_Pipeline = new Pipeline();
         m_VisionPortal = VisionPortal.easyCreateWithDefaults(hwmap.get(WebcamName.class, "Webcam 1"), m_Pipeline);
     }
 

@@ -17,11 +17,11 @@ public class IntakeDepositSystem_DC {
     }
 
     // Quickness over precision; we can use 1.2s max extension time
-    public static int LOW_POSITION = 30;
+    public static int LOW_POSITION = 5;
 
     public static int ROTATABLE_POSITION = 200;
 
-    public static  int SET_LINE_1 = 1000;
+    public static  int SET_LINE_1 = 800;
 
     public static  int SET_LINE_2 = 2000;
 
@@ -29,9 +29,11 @@ public class IntakeDepositSystem_DC {
 
     public static  double ARM_POWER = 0.8;
 
-    public static double ROTATOR_MAX = 0.8;
+    public static double ROTATOR_MAX = 0.3;
 
     public static double ROTATOR_MIN = 0.0;
+
+    public static double SPINTAKE_POWER = 1.0;
 
     public SpintakeModes SpintakeMode = SpintakeModes.STOP;
 
@@ -55,6 +57,8 @@ public class IntakeDepositSystem_DC {
         //TODO: Setup servos
         m_RightRot = hwmap.get(Servo.class, "right rot");
         m_ReleaseLatch = hwmap.get(Servo.class, "release");
+
+        RunSlidesToPosition(5);
     }
 
 
@@ -62,42 +66,27 @@ public class IntakeDepositSystem_DC {
      * @param: autonomous, use in autonomous to enable blocking behavior
      */
     public void UpdateStateMachine(boolean autonomous) {
-        if (!autonomous) {
-           if (SpintakeMode == SpintakeModes.INTAKE) {
-               CurrentLocationState = LOW_POSITION;
-           }
-           if (CurrentLocationState != LastPosition) {
-                if (CurrentLocationState == LOW_POSITION || SpintakeMode == SpintakeModes.INTAKE) {
-                    PrepareToIntake();
-                    RunSlidesToPosition(LOW_POSITION);
-                } else {
-                    RunSlidesToPosition(CurrentLocationState);
-                    PrepareToDeposit();
-                }
+        if (SpintakeMode == SpintakeModes.INTAKE) {
+            CurrentLocationState = LOW_POSITION;
+       }
+       if (CurrentLocationState != LastPosition) {
+            if (CurrentLocationState == LOW_POSITION || SpintakeMode == SpintakeModes.INTAKE) {
+                PrepareToIntake();
+                RunSlidesToPosition(LOW_POSITION);
+            } else {
+                RunSlidesToPosition(CurrentLocationState);
+                PrepareToDeposit();
             }
-        } else {
-            if (SpintakeMode == SpintakeModes.INTAKE) {
-                CurrentLocationState = LOW_POSITION;
-            }
-            if (CurrentLocationState != LastPosition) {
-                if (CurrentLocationState == LOW_POSITION || SpintakeMode == SpintakeModes.INTAKE) {
-                    PrepareToIntake();
-                    RunSlidesToPosition(LOW_POSITION);
-                } else {
-                    RunSlidesToPosition(CurrentLocationState);
-                    PrepareToDeposit();
-                }
-            }
-            while (IsBusy()) {}
-        }
-        LastPosition = CurrentLocationState;
+       }
+
+       LastPosition = CurrentLocationState;
 
         // spintake state machine
         if (SpintakeMode == SpintakeModes.INTAKE) {
-            m_Spintake.setPower(1.0);
+            m_Spintake.setPower(SPINTAKE_POWER);
         }
         else if (SpintakeMode == SpintakeModes.SPIT) {
-            m_Spintake.setPower(-1.0);
+            m_Spintake.setPower(-SPINTAKE_POWER);
         }
         else {
             m_Spintake.setPower(0.0);
@@ -106,13 +95,11 @@ public class IntakeDepositSystem_DC {
     }
 
     private void PrepareToIntake() {
-        //m_LeftRot.setPosition(ROTATOR_MAX);
         m_RightRot.setPosition(ROTATOR_MIN);
         ReleaseDeposit();
     }
 
     private void PrepareToDeposit() {
-        //m_LeftRot.setPosition(ROTATOR_MAX);
         m_RightRot.setPosition(ROTATOR_MAX);
         CloseDeposit();
     }
@@ -131,10 +118,7 @@ public class IntakeDepositSystem_DC {
     }
 
     public void CloseDeposit() {
-        m_ReleaseLatch.setPosition(0.6);
+        m_ReleaseLatch.setPosition(1.0);
     }
 
-    public boolean IsBusy() {
-        return m_LeftSlide.isBusy() && m_RightSlide.isBusy();
-    }
 }

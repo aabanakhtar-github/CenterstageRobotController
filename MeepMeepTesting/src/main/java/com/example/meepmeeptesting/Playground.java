@@ -15,15 +15,12 @@ public class Playground {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(12, -57, Math.toRadians(270)))
-                                .lineTo(new Vector2d(12, -36))
-                                .turn(Math.toRadians(-90))
-                                .setReversed(true)
-                                .splineTo(new Vector2d(48, -30), Math.toRadians(0))
-                                .setReversed(false)
-                                .splineTo(new Vector2d(24, -12), Math.toRadians(180))
-                                .lineTo(new Vector2d(60, -12))
+                        drive.trajectorySequenceBuilder(new Pose2d(12, 65, Math.toRadians(90)))
+                                .lineTo(new Vector2d(12, 40))
+
+
                                 .build()
+
                 );
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_CENTERSTAGE_JUICE_DARK)
