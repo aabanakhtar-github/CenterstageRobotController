@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import java.sql.Driver;
+
 @Config
 public class IntakeDepositSystem_DC {
 
@@ -25,7 +27,7 @@ public class IntakeDepositSystem_DC {
 
     public static  int SET_LINE_2 = 2000;
 
-    public static  int SET_LINE_3 = 3000;
+    public static  int SET_LINE_3 = 2500;
 
     public static  double ARM_POWER = 0.8;
 
@@ -34,6 +36,8 @@ public class IntakeDepositSystem_DC {
     public static double ROTATOR_MIN = 0.0;
 
     public static double SPINTAKE_POWER = 1.0;
+
+    public boolean DriverPressedButtonB = false;
 
     public SpintakeModes SpintakeMode = SpintakeModes.STOP;
 
@@ -44,6 +48,8 @@ public class IntakeDepositSystem_DC {
     private Servo m_LeftRot, m_RightRot, m_ReleaseLatch;
 
     private int LastPosition = LOW_POSITION;
+
+    public boolean DepositIsOpenOverride = false;
 
     public IntakeDepositSystem_DC(HardwareMap hwmap) {
         m_LeftSlide = hwmap.get(DcMotorEx.class, "left slide");
@@ -66,32 +72,39 @@ public class IntakeDepositSystem_DC {
      * @param: autonomous, use in autonomous to enable blocking behavior
      */
     public void UpdateStateMachine(boolean autonomous) {
-        if (SpintakeMode == SpintakeModes.INTAKE) {
-            CurrentLocationState = LOW_POSITION;
-       }
-       if (CurrentLocationState != LastPosition) {
-            if (CurrentLocationState == LOW_POSITION || SpintakeMode == SpintakeModes.INTAKE) {
-                PrepareToIntake();
-                RunSlidesToPosition(LOW_POSITION);
-            } else {
-                RunSlidesToPosition(CurrentLocationState);
+
+        if (LastPosition != CurrentLocationState) {
+            RunSlidesToPosition(CurrentLocationState);
+
+            if (CurrentLocationState > LOW_POSITION) {
                 PrepareToDeposit();
+            } else if (CurrentLocationState == LOW_POSITION) {
+                PrepareToIntake();
             }
-       }
-
-       LastPosition = CurrentLocationState;
-
-        // spintake state machine
-        if (SpintakeMode == SpintakeModes.INTAKE) {
-            m_Spintake.setPower(SPINTAKE_POWER);
-        }
-        else if (SpintakeMode == SpintakeModes.SPIT) {
-            m_Spintake.setPower(-SPINTAKE_POWER);
-        }
-        else {
-            m_Spintake.setPower(0.0);
         }
 
+        // quick feature to lower slides automatically
+        if (SpintakeMode == SpintakeModes.INTAKE && CurrentLocationState != LOW_POSITION) {
+            RunSlidesToPosition(LOW_POSITION);
+            PrepareToIntake();
+        }
+
+        switch(SpintakeMode) {
+            case SPIT:
+                m_Spintake.setPower(-1);
+                break;
+            case INTAKE:
+                m_Spintake.setPower(1);
+                break;
+            case STOP:
+                m_Spintake.setPower(0);
+                break;
+        }
+
+        if (DriverPressedButtonB)
+            ReleaseDeposit();
+
+        LastPosition = CurrentLocationState;
     }
 
     private void PrepareToIntake() {
@@ -101,6 +114,7 @@ public class IntakeDepositSystem_DC {
 
     private void PrepareToDeposit() {
         m_RightRot.setPosition(ROTATOR_MAX);
+        DriverPressedButtonB = false;
         CloseDeposit();
     }
 

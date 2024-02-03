@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.components;
 
 import android.graphics.Canvas;
+import android.util.Size;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -13,6 +15,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
+import java.nio.charset.CharacterCodingException;
 
 public class RedPropDetector {
 
@@ -26,7 +30,12 @@ public class RedPropDetector {
 
     public RedPropDetector(HardwareMap hwmap) {
         m_Pipeline = new RedPropDetector.Pipeline();
-        m_VisionPortal = VisionPortal.easyCreateWithDefaults(hwmap.get(WebcamName.class, "Webcam 1"), m_Pipeline);
+        m_VisionPortal = new VisionPortal.Builder()
+                .setCamera(hwmap.get(CameraName.class, "Webcam 1"))
+                .setCameraResolution(new Size(800, 600))
+                .addProcessor(m_Pipeline)
+                .enableLiveView(true)
+                .build();
     }
 
     public Positions GetDetectionPosition() {
@@ -34,7 +43,7 @@ public class RedPropDetector {
     }
 
 
-    public class Pipeline implements VisionProcessor {
+    public static class Pipeline implements VisionProcessor {
 
         private int LeftPercentage = 0, RightPercentage = 0, MiddlePercentage = 0;
 
@@ -58,7 +67,7 @@ public class RedPropDetector {
             Imgproc.cvtColor(input, input, Imgproc.COLOR_RGB2HSV);
             // scalar HSLj color ranges for red things
             Scalar lower_hsv = new Scalar(0, 30, 70);
-            Scalar higher_hsv = new Scalar(50, 255, 255);
+            Scalar higher_hsv = new Scalar(30, 255, 255);
 
             Core.inRange(input, lower_hsv, higher_hsv, input);
             Mat left = input.submat(m_LeftROI);

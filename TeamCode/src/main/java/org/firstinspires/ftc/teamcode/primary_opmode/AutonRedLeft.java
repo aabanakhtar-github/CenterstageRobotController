@@ -18,16 +18,16 @@ public class AutonRedLeft extends LinearOpMode {
 
     IntakeDepositSystem_DC m_IntakeSys;
 
-    BluePropDetector m_RedPropDetector;
+    RedPropDetector m_RedPropDetector;
 
     @Override
     public void runOpMode() throws InterruptedException {
         m_Drive = new SampleMecanumDrive(hardwareMap);
         m_IntakeSys = new IntakeDepositSystem_DC(hardwareMap);
-        m_RedPropDetector = new BluePropDetector(hardwareMap);
+        m_RedPropDetector = new RedPropDetector(hardwareMap);
 
-        BluePropDetector.Positions prop_location = BluePropDetector.Positions.MIDDLE;
-        m_IntakeSys.SPINTAKE_POWER = 0.5;
+        RedPropDetector.Positions prop_location = RedPropDetector.Positions.MIDDLE;
+        m_IntakeSys.SPINTAKE_POWER = 0.3;
         m_Drive.setPoseEstimate(new Pose2d(-36, -60, Math.toRadians(270)));
 
         while (opModeInInit() && !isStopRequested()) {
@@ -36,7 +36,7 @@ public class AutonRedLeft extends LinearOpMode {
             telemetry.update();
         }
 
-        double placement_Y = -35.0;
+        double placement_Y = -34.0;
         double placement_degrees = 0.0f;
         TrajectorySequence to_prop_location = null;
 
@@ -46,7 +46,7 @@ public class AutonRedLeft extends LinearOpMode {
                         .lineTo(new Vector2d(-36, -36))
                         .turn(Math.toRadians(90))
                         .build();
-                placement_Y = -30;
+                placement_Y = -29;
                 break;
             case RIGHT:
                 to_prop_location = m_Drive.trajectorySequenceBuilder(m_Drive.getPoseEstimate())
@@ -54,11 +54,11 @@ public class AutonRedLeft extends LinearOpMode {
                         .turn(Math.toRadians(-90))
                         .build();
 
-                placement_Y = -40;
+                placement_Y = -37;
                 break;
             case MIDDLE:
                 to_prop_location = m_Drive.trajectorySequenceBuilder(m_Drive.getPoseEstimate())
-                        .lineTo(new Vector2d(-36, -30))
+                        .lineTo(new Vector2d(-36, -36))
                         .build();
                 break;
         }
@@ -74,11 +74,12 @@ public class AutonRedLeft extends LinearOpMode {
         m_IntakeSys.UpdateStateMachine(true);
 
         TrajectorySequence to_start_and_around = m_Drive.trajectorySequenceBuilder(m_Drive.getPoseEstimate())
-                .lineTo(new Vector2d(-36, -48 ))
-                .splineTo(new Vector2d(-60, -36), Math.toRadians(270))
+                .splineTo(new Vector2d(-36, -48 ), Math.toRadians(270))
+                .splineTo(new Vector2d(-57, -36), Math.toRadians(90))
                 .build();
 
         m_Drive.followTrajectorySequence(to_start_and_around);
+        sleep(5000);
 
         TrajectorySequence to_backdrop = m_Drive.trajectorySequenceBuilder(m_Drive.getPoseEstimate())
                 .splineTo(new Vector2d(-36, -6 ), Math.toRadians(0))

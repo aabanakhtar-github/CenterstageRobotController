@@ -5,13 +5,14 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.components.BluePropDetector;
 import org.firstinspires.ftc.teamcode.components.DriveTrain;
 import org.firstinspires.ftc.teamcode.components.IntakeDepositSystem_DC;
 import org.firstinspires.ftc.teamcode.components.RedPropDetector;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name = "Auto: Red Right")
+@Autonomous(name = "Auto: Red right")
 public class AutonRedRight extends LinearOpMode {
 
     private SampleMecanumDrive m_Drive;
@@ -26,11 +27,14 @@ public class AutonRedRight extends LinearOpMode {
         m_IntakeSys = new IntakeDepositSystem_DC(hardwareMap);
         m_PropDetector = new RedPropDetector(hardwareMap);
 
-        IntakeDepositSystem_DC.SPINTAKE_POWER = 0.5;
+        m_IntakeSys.SPINTAKE_POWER = 0.3;
+
         RedPropDetector.Positions prop_location = m_PropDetector.GetDetectionPosition();
         // prop detection
         while (opModeInInit() && !isStopRequested()) {
             prop_location = m_PropDetector.GetDetectionPosition();
+            telemetry.addData("location", prop_location.toString());
+            telemetry.update();
         }
 
         waitForStart();
@@ -38,26 +42,25 @@ public class AutonRedRight extends LinearOpMode {
         m_Drive.setPoseEstimate(new Pose2d(12, -65, Math.toRadians(270)));
 
         TrajectorySequence to_prop_location = null;
-        double placement_Y = -36.0;
+        double placement_Y = -37.0;
         double placement_degrees = 0.0f;
         switch (prop_location) {
             case LEFT:
                 to_prop_location = m_Drive.trajectorySequenceBuilder(m_Drive.getPoseEstimate())
-                        .lineTo(new Vector2d(12, -30))
+                        .lineTo(new Vector2d(12, -36))
                         .turn(Math.toRadians(90))
-                        .back(5)
                         .build();
-            placement_Y = -30;
+
+                placement_Y = -34;
                 break;
             case RIGHT:
                 to_prop_location = m_Drive.trajectorySequenceBuilder(m_Drive.getPoseEstimate())
                         .setReversed(true)
-                        .splineTo(new Vector2d(36, -36), 0)
-                        .turn(Math.toRadians(180))
+                        .splineTo(new Vector2d(40, -36), Math.toRadians(0))
                         .setReversed(false)
+                        .turn(Math.toRadians(180))
                         .build();
-
-                placement_Y = -42;
+                placement_Y = -43;
                 break;
             case MIDDLE:
                 to_prop_location = m_Drive.trajectorySequenceBuilder(m_Drive.getPoseEstimate())
@@ -75,7 +78,6 @@ public class AutonRedRight extends LinearOpMode {
         m_IntakeSys.SpintakeMode = IntakeDepositSystem_DC.SpintakeModes.STOP;
         m_IntakeSys.UpdateStateMachine(true);
 
-
         // drop purple
         TrajectorySequence reset_and_go_to_backdrop = m_Drive.trajectorySequenceBuilder(m_Drive.getPoseEstimate())
                 .addTemporalMarker(() -> {
@@ -87,7 +89,7 @@ public class AutonRedRight extends LinearOpMode {
 
         m_Drive.followTrajectorySequence(reset_and_go_to_backdrop);
 
-         m_IntakeSys.ReleaseDeposit();
+        m_IntakeSys.ReleaseDeposit();
         sleep(2000);
 
         TrajectorySequence park = m_Drive.trajectorySequenceBuilder(m_Drive.getPoseEstimate())
@@ -97,12 +99,10 @@ public class AutonRedRight extends LinearOpMode {
                     m_IntakeSys.CurrentLocationState = IntakeDepositSystem_DC.LOW_POSITION;
                     m_IntakeSys.UpdateStateMachine(true);
                 })
-                .lineTo(new Vector2d(53 , -3))
+                .lineTo(new Vector2d(60 , -12))
                 .build();
 
         m_Drive.followTrajectorySequence(park);
-
     }
-
-
 }
+

@@ -36,9 +36,7 @@ public class DriveTrain {
     }
 
     public void Update(double x, double y, double rx) {
-        //m_MecanumDrivebase.driveFieldCentric(
-         //     x, y, rx, m_IMU.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)
-        //);
+
         m_MecanumDrivebase.driveRobotCentric(x * 0.5, y, rx);
     }
 }

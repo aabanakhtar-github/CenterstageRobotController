@@ -27,26 +27,28 @@ public class AutonBlueLeft extends LinearOpMode {
         m_IntakeSys = new IntakeDepositSystem_DC(hardwareMap);
         m_PropDetector = new BluePropDetector(hardwareMap);
 
-        m_IntakeSys.SPINTAKE_POWER = 0.5;
+        m_IntakeSys.SPINTAKE_POWER = 0.3;
 
         BluePropDetector.Positions prop_location = m_PropDetector.GetDetectionPosition();
         // prop detection
         while (opModeInInit() && !isStopRequested()) {
             prop_location = m_PropDetector.GetDetectionPosition();
+            telemetry.addData("location", prop_location.toString());
+            telemetry.update();
         }
 
         waitForStart();
 
-        m_Drive.setPoseEstimate(new Pose2d(12, 65, Math.toRadians(90 )));
+        m_Drive.setPoseEstimate(new Pose2d(12, 65, Math.toRadians(90)));
 
         TrajectorySequence to_prop_location = null;
-        double placement_Y = 36.0;
+        double placement_Y = 39.0;
         double placement_degrees = 0.0f;
         switch (prop_location) {
             case LEFT:
                 to_prop_location = m_Drive.trajectorySequenceBuilder(m_Drive.getPoseEstimate())
                         .setReversed(true)
-                        .splineTo(new Vector2d(36, 36), Math.toRadians(0))
+                        .splineTo(new Vector2d(37, 36), Math.toRadians(0))
                         .setReversed(false)
                         .turn(Math.toRadians(180))
                         .build();
@@ -60,7 +62,7 @@ public class AutonBlueLeft extends LinearOpMode {
                         .setReversed(false)
                         .build();
 
-                placement_Y = 32;
+                placement_Y = 35;
                 break;
             case MIDDLE:
                 to_prop_location = m_Drive.trajectorySequenceBuilder(m_Drive.getPoseEstimate())
@@ -99,12 +101,10 @@ public class AutonBlueLeft extends LinearOpMode {
                     m_IntakeSys.CurrentLocationState = IntakeDepositSystem_DC.LOW_POSITION;
                     m_IntakeSys.UpdateStateMachine(true);
                 })
-                .lineTo(new Vector2d(53 , 3))
+                .lineTo(new Vector2d(53 , 12))
                 .build();
 
         m_Drive.followTrajectorySequence(park);
     }
-
-
 }
 

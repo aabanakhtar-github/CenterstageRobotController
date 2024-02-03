@@ -4,9 +4,11 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.har
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Size;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -29,7 +31,12 @@ public class BluePropDetector {
 
     public BluePropDetector(HardwareMap hwmap) {
         m_Pipeline = new Pipeline();
-        m_VisionPortal = VisionPortal.easyCreateWithDefaults(hwmap.get(WebcamName.class, "Webcam 1"), m_Pipeline);
+        m_VisionPortal = new VisionPortal.Builder()
+                .setCamera(hwmap.get(CameraName.class, "Webcam 1"))
+                .setCameraResolution(new Size(800, 600))
+                .addProcessor(m_Pipeline)
+                .enableLiveView(true)
+                .build();
     }
 
     public Positions GetDetectionPosition() {
@@ -37,7 +44,7 @@ public class BluePropDetector {
     }
 
 
-    public class Pipeline implements VisionProcessor {
+    public static class Pipeline implements VisionProcessor {
 
 
         private int LeftPercentage = 0, RightPercentage = 0, MiddlePercentage = 0;
