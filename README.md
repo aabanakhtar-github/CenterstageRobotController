@@ -1,12 +1,11 @@
 # CenterstageRobot20625
+This repository contains the opmodes for team 20625 during the Centerstage FTC Season. 
 
-Team 20625's OpModes for the 2023-24 centerstage season.
-
+### Awards:
 Think Award 2nd, Design Award 1st 
 
+###: 
 Libraries used:
-- FTCLib
+- FTCLib 
 - OpenCV
 - Roadrunner
-
-More in the future? 
