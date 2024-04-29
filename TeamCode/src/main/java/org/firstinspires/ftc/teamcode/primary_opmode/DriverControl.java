@@ -22,7 +22,6 @@ public class DriverControl extends LinearOpMode {
 
     private ElapsedTime m_Cooldown;
 
-
     private IntakeDepositSystem_DC m_IntakeSys;
 
     private Servo m_Launcher;
